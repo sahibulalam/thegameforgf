@@ -20,7 +20,7 @@ export class JourneyScene extends Phaser.Scene {
     const height = this.scale.height;
 
     // Platforms at 40% from top - CENTER of screen
-    const platformY = height * 0.4;
+    const platformY = height * 0.55;
     const playerStartY = platformY - 60;
 
     this.reachedGirl = false;
@@ -255,7 +255,7 @@ export class JourneyScene extends Phaser.Scene {
 
     // Reset if fallen
     if (this.player.y > height + 150) {
-      const platformY = height * 0.4;
+      const platformY = height * 0.55;
       this.player.setPosition(80, platformY - 60);
       body.setVelocity(0, 0);
     }
