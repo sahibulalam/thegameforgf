@@ -19,10 +19,15 @@ export class JourneyScene extends Phaser.Scene {
     const width = this.scale.width;
     const height = this.scale.height;
 
+    // Calculate responsive positions
+    const platformY = height * 0.55;
+    const playerStartY = platformY - 60;
+
     this.reachedGirl = false;
     this.inputState = { left: false, right: false, jump: false };
     this.cameras.main.fadeIn(800, 0, 0, 0);
 
+    // Background
     this.bg1 = this.add.tileSprite(0, 0, width, height, "background")
       .setOrigin(0, 0)
       .setScrollFactor(0)
@@ -30,67 +35,95 @@ export class JourneyScene extends Phaser.Scene {
 
     this.createStars(width, height);
 
-    this.add.text(width * 0.5, 30, "The Journey", {
-      fontSize: "24px",
+    // Title
+    const titleSize = Math.min(28, width * 0.045);
+    this.add.text(width * 0.5, height * 0.08, "The Journey", {
+      fontSize: titleSize + "px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
     }).setOrigin(0.5).setScrollFactor(0).setAlpha(0.9);
 
-    // Flat ground
+    // Floating platforms
     this.platforms = this.physics.add.staticGroup();
 
-    const groundY = height - 30;
-    for (let x = -100; x < 1400; x += 60) {
-      const ground = this.platforms.create(x, groundY, "platform") as Phaser.Physics.Arcade.Sprite;
-      ground.setScale(2).refreshBody();
-    }
+    const platformPositions = [
+      { x: 80, y: platformY },
+      { x: 280, y: platformY - 15 },
+      { x: 480, y: platformY + 10 },
+      { x: 680, y: platformY - 25 },
+      { x: 880, y: platformY + 5 },
+      { x: 1080, y: platformY - 10 },
+    ];
+
+    platformPositions.forEach((pos) => {
+      this.createFloatingPlatform(pos.x, pos.y, 2.5);
+    });
 
     // Player
-    this.player = this.physics.add.sprite(50, height - 120, "player");
-    this.player.setScale(1.2);
+    this.player = this.physics.add.sprite(80, playerStartY, "player");
+    this.player.setScale(1.3);
 
     const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
-    playerBody.setGravityY(400);
+    playerBody.setGravityY(500);
     playerBody.setBounce(0);
     playerBody.setCollideWorldBounds(false);
     playerBody.setSize(24, 40);
 
     // Player name
-    this.playerName = this.add.text(this.player.x, this.player.y - 45, "Debs", {
-      fontSize: "14px",
+    this.playerName = this.add.text(this.player.x, this.player.y - 50, "Debs", {
+      fontSize: "16px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
+      fontStyle: "bold",
     }).setOrigin(0.5);
 
-    // Girl at the end
-    this.girl = this.physics.add.sprite(1100, height - 90, "girl");
-    this.girl.setScale(1.3);
+    // Girl at the end on a special platform
+    this.createFloatingPlatform(1200, platformY, 3);
+
+    this.girl = this.physics.add.sprite(1200, platformY - 60, "girl");
+    this.girl.setScale(1.4);
     this.girl.setTint(0xffc2d4);
 
     const girlBody = this.girl.body as Phaser.Physics.Arcade.Body;
     girlBody.setAllowGravity(false);
     girlBody.setImmovable(true);
 
+    // Girl name
+    const girlName = this.add.text(this.girl.x, this.girl.y - 55, "♥", {
+      fontSize: "20px",
+      color: "#ff6b9d",
+    }).setOrigin(0.5);
+
     // Girl floating animation
     this.tweens.add({
+      targets: [this.girl, girlName],
+      y: "-=8",
+      duration: 1500,
+      ease: "Sine.easeInOut",
+      yoyo: true,
+      repeat: -1,
+    });
+
+    // Glow around girl
+    this.tweens.add({
       targets: this.girl,
-      y: this.girl.y - 8,
-      duration: 1200,
+      alpha: { from: 0.8, to: 1 },
+      duration: 1000,
       ease: "Sine.easeInOut",
       yoyo: true,
       repeat: -1,
     });
 
     // Arrow pointing to girl
-    const arrow = this.add.text(1000, height - 130, "→", {
-      fontSize: "32px",
+    const arrow = this.add.text(1050, platformY - 80, "→", {
+      fontSize: "36px",
       color: "#ffc2d4",
     }).setOrigin(0.5);
 
     this.tweens.add({
       targets: arrow,
-      x: arrow.x + 15,
-      duration: 500,
+      x: arrow.x + 20,
+      duration: 600,
       ease: "Sine.easeInOut",
       yoyo: true,
       repeat: -1,
@@ -107,14 +140,15 @@ export class JourneyScene extends Phaser.Scene {
     }
 
     // Camera
-    this.cameras.main.setBounds(0, 0, 1200, height);
-    this.cameras.main.startFollow(this.player, true, 0.15, 0.15);
-    this.cameras.main.setDeadzone(100, 50);
-    this.physics.world.setBounds(0, 0, 1200, height + 100);
+    this.cameras.main.setBounds(0, 0, 1350, height);
+    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    this.cameras.main.setDeadzone(width * 0.2, height * 0.3);
+    this.physics.world.setBounds(0, 0, 1350, height + 200);
 
     // Instruction
-    const text = this.add.text(width / 2, 70, "Walk to her... →", {
-      fontSize: "18px",
+    const instrSize = Math.min(20, width * 0.035);
+    const text = this.add.text(width / 2, height * 0.18, "Walk to her... →", {
+      fontSize: instrSize + "px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
     }).setOrigin(0.5).setScrollFactor(0);
@@ -125,18 +159,44 @@ export class JourneyScene extends Phaser.Scene {
       delay: 2500,
       duration: 1000,
     });
+
+    // Handle resize
+    this.scale.on("resize", this.handleResize, this);
+  }
+
+  private handleResize(gameSize: Phaser.Structs.Size) {
+    const width = gameSize.width;
+    const height = gameSize.height;
+
+    this.cameras.main.setSize(width, height);
+    this.bg1.setSize(width, height);
+  }
+
+  private createFloatingPlatform(x: number, y: number, scaleX: number) {
+    const platform = this.platforms.create(x, y, "platform") as Phaser.Physics.Arcade.Sprite;
+    platform.setScale(scaleX, 1.2).refreshBody();
+
+    // Add floating animation
+    this.tweens.add({
+      targets: platform,
+      y: y - 5,
+      duration: 2000 + Math.random() * 1000,
+      ease: "Sine.easeInOut",
+      yoyo: true,
+      repeat: -1,
+    });
   }
 
   private createStars(width: number, height: number) {
-    for (let i = 0; i < 50; i++) {
-      const x = Phaser.Math.Between(0, 1200);
-      const y = Phaser.Math.Between(0, height * 0.5);
-      const star = this.add.circle(x, y, Phaser.Math.Between(1, 2), 0xffffff, 0.7);
+    for (let i = 0; i < 60; i++) {
+      const x = Phaser.Math.Between(0, 1350);
+      const y = Phaser.Math.Between(0, height * 0.4);
+      const star = this.add.circle(x, y, Phaser.Math.Between(1, 3), 0xffffff, 0.8);
 
       this.tweens.add({
         targets: star,
-        alpha: 0.3,
-        duration: Phaser.Math.Between(1500, 2500),
+        alpha: 0.2,
+        duration: Phaser.Math.Between(1500, 3000),
         ease: "Sine.easeInOut",
         yoyo: true,
         repeat: -1,
@@ -156,9 +216,9 @@ export class JourneyScene extends Phaser.Scene {
 
     this.tweens.add({
       targets: this.player,
-      x: this.girl.x - 40,
+      x: this.girl.x - 45,
       y: this.girl.y,
-      duration: 600,
+      duration: 700,
       ease: "Power2",
     });
 
@@ -168,25 +228,28 @@ export class JourneyScene extends Phaser.Scene {
       duration: 300,
     });
 
-    // Show heart between them
-    this.time.delayedCall(700, () => {
-      const heart = this.add.text(
-        (this.player.x + this.girl.x) / 2,
-        this.girl.y - 50,
-        "❤️",
-        { fontSize: "32px" }
-      ).setOrigin(0.5);
+    // Show hearts between them
+    this.time.delayedCall(800, () => {
+      for (let i = 0; i < 3; i++) {
+        const heart = this.add.text(
+          (this.player.x + this.girl.x) / 2,
+          this.girl.y - 40 - (i * 25),
+          "❤️",
+          { fontSize: "24px" }
+        ).setOrigin(0.5).setAlpha(0);
 
-      this.tweens.add({
-        targets: heart,
-        scale: 1.3,
-        duration: 400,
-        yoyo: true,
-        repeat: 2,
-      });
+        this.tweens.add({
+          targets: heart,
+          alpha: 1,
+          y: heart.y - 20,
+          duration: 500,
+          delay: i * 200,
+          ease: "Back.easeOut",
+        });
+      }
     });
 
-    this.time.delayedCall(1400, () => {
+    this.time.delayedCall(1800, () => {
       this.cameras.main.fadeOut(1000, 0, 0, 0);
       this.cameras.main.once("camerafadeoutcomplete", () => {
         this.scene.start("ProposalScene");
@@ -202,20 +265,23 @@ export class JourneyScene extends Phaser.Scene {
     if (!this.player || !this.player.body || this.reachedGirl) return;
 
     const body = this.player.body as Phaser.Physics.Arcade.Body;
+    const height = this.scale.height;
 
-    if (this.player.y > this.scale.height + 50) {
-      this.player.setPosition(50, this.scale.height - 120);
+    // Reset if fallen
+    if (this.player.y > height + 100) {
+      const platformY = height * 0.55;
+      this.player.setPosition(80, platformY - 60);
       body.setVelocity(0, 0);
     }
 
     // Update name position
     if (this.playerName) {
-      this.playerName.setPosition(this.player.x, this.player.y - 45);
+      this.playerName.setPosition(this.player.x, this.player.y - 50);
     }
 
     const onGround = body.blocked.down || body.touching.down;
-    const moveSpeed = 250;
-    const jumpPower = -380;
+    const moveSpeed = 260;
+    const jumpPower = -480;
 
     let moveLeft = this.inputState.left;
     let moveRight = this.inputState.right;

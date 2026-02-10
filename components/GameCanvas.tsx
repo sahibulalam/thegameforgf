@@ -9,7 +9,7 @@ export default function GameCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showProposal, setShowProposal] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [isMobile, setIsMobile] = useState(true);
+  const [showControls, setShowControls] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleProposalTrigger = useCallback(() => {
@@ -27,10 +27,15 @@ export default function GameCanvas() {
   }, []);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(true); // Always show controls for easier testing
+    const checkDevice = () => {
+      // Show controls on touch devices or smaller screens
+      const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 1200;
+      setShowControls(isTouchDevice || isSmallScreen);
     };
-    checkMobile();
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
   useEffect(() => {
@@ -67,6 +72,10 @@ export default function GameCanvas() {
         scene: [PreloadScene, DistanceScene, JourneyScene, ProposalScene],
         input: {
           activePointers: 3,
+        },
+        render: {
+          antialias: true,
+          pixelArt: false,
         },
       };
 
@@ -106,14 +115,15 @@ export default function GameCanvas() {
   return (
     <div className="relative w-full h-full overflow-hidden">
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0f] z-20">
-          <div className="text-pink-300 text-xl animate-pulse">Loading...</div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0f] z-20">
+          <div className="text-pink-300 text-2xl mb-4">Loading...</div>
+          <div className="text-pink-200/60 text-sm">A journey for you</div>
         </div>
       )}
 
       <div ref={containerRef} className="w-full h-full" />
 
-      {isMobile && !showProposal && !isLoading && (
+      {showControls && !showProposal && !isLoading && (
         <TouchControls onControl={handleControl} />
       )}
 
