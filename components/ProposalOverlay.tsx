@@ -13,8 +13,6 @@ interface Particle {
   y: number;
   color: string;
   size: number;
-  velocityX: number;
-  velocityY: number;
   rotation: number;
 }
 
@@ -31,8 +29,8 @@ export default function ProposalOverlay({ onYes, showConfetti }: ProposalOverlay
   }, [onYes]);
 
   const handleNoHover = useCallback(() => {
-    const maxX = 120;
-    const maxY = 80;
+    const maxX = 100;
+    const maxY = 60;
     setNoPosition({
       x: (Math.random() - 0.5) * 2 * maxX,
       y: (Math.random() - 0.5) * 2 * maxY,
@@ -42,15 +40,13 @@ export default function ProposalOverlay({ onYes, showConfetti }: ProposalOverlay
   useEffect(() => {
     if (showConfetti) {
       const newParticles: Particle[] = [];
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 60; i++) {
         newParticles.push({
           id: i,
           x: Math.random() * 100,
           y: -5,
           color: colors[Math.floor(Math.random() * colors.length)],
           size: Math.random() * 8 + 4,
-          velocityX: (Math.random() - 0.5) * 8,
-          velocityY: Math.random() * 2 + 1,
           rotation: Math.random() * 360,
         });
       }
@@ -59,11 +55,11 @@ export default function ProposalOverlay({ onYes, showConfetti }: ProposalOverlay
   }, [showConfetti]);
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50">
       {particles.map((p) => (
         <div
           key={p.id}
-          className="absolute pointer-events-none animate-fall"
+          className="absolute pointer-events-none"
           style={{
             left: `${p.x}%`,
             top: `${p.y}%`,
@@ -88,14 +84,21 @@ export default function ProposalOverlay({ onYes, showConfetti }: ProposalOverlay
 
       {!accepted ? (
         <div className="text-center px-6">
-          <h1 className="text-4xl md:text-6xl font-serif text-gradient glow-text mb-12">
-            Will you marry me?
+          <h1 className="text-3xl md:text-5xl font-serif mb-10"
+            style={{
+              background: "linear-gradient(135deg, #ffc2d4 0%, #ff6b9d 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textShadow: "0 0 30px rgba(255, 107, 157, 0.3)",
+            }}
+          >
+            Will you stay till I die?
           </h1>
 
-          <div className="flex flex-col md:flex-row gap-6 items-center justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <button
               onClick={handleYes}
-              className="game-button bg-green-500/20 border-2 border-green-500 text-green-400 hover:bg-green-500/40 min-w-[140px]"
+              className="px-8 py-3 text-lg rounded-full bg-green-500/20 border-2 border-green-500 text-green-400 hover:bg-green-500/40 transition-all min-w-[120px]"
             >
               YES
             </button>
@@ -103,7 +106,7 @@ export default function ProposalOverlay({ onYes, showConfetti }: ProposalOverlay
             <button
               onMouseEnter={handleNoHover}
               onTouchStart={handleNoHover}
-              className="game-button bg-red-500/20 border-2 border-red-500 text-red-400 min-w-[140px] transition-transform duration-200"
+              className="px-8 py-3 text-lg rounded-full bg-red-500/20 border-2 border-red-500 text-red-400 min-w-[120px] transition-transform duration-200"
               style={{
                 transform: `translate(${noPosition.x}px, ${noPosition.y}px)`,
               }}
@@ -114,18 +117,27 @@ export default function ProposalOverlay({ onYes, showConfetti }: ProposalOverlay
         </div>
       ) : (
         <div className="text-center px-6">
-          <div className="w-28 h-28 md:w-36 md:h-36 mx-auto mb-8 rounded-full border-4 border-romantic-accent flex items-center justify-center animate-pulse">
-            <span className="text-5xl md:text-6xl">💍</span>
+          <div className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-6 rounded-full border-4 border-pink-400 flex items-center justify-center animate-pulse">
+            <span className="text-4xl md:text-5xl">💕</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-serif text-gradient glow-text">
-            Forever starts now.
+          <h1 className="text-3xl md:text-5xl font-serif"
+            style={{
+              background: "linear-gradient(135deg, #ffc2d4 0%, #ff6b9d 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textShadow: "0 0 30px rgba(255, 107, 157, 0.3)",
+            }}
+          >
+            Forever with you ❤️
           </h1>
 
+          <p className="mt-4 text-pink-300/80 text-lg">Thank you, Debs</p>
+
           <div className="mt-6 flex justify-center gap-2">
-            <span className="text-3xl animate-bounce" style={{ animationDelay: "0ms" }}>❤️</span>
-            <span className="text-3xl animate-bounce" style={{ animationDelay: "100ms" }}>❤️</span>
-            <span className="text-3xl animate-bounce" style={{ animationDelay: "200ms" }}>❤️</span>
+            <span className="text-2xl animate-bounce" style={{ animationDelay: "0ms" }}>❤️</span>
+            <span className="text-2xl animate-bounce" style={{ animationDelay: "100ms" }}>❤️</span>
+            <span className="text-2xl animate-bounce" style={{ animationDelay: "200ms" }}>❤️</span>
           </div>
         </div>
       )}

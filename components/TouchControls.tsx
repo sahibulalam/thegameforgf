@@ -23,18 +23,18 @@ export default function TouchControls({ onControl }: TouchControlsProps) {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 p-6 z-50"
+      className="fixed bottom-2 left-0 right-0 px-3 z-50 pointer-events-none"
       style={{ touchAction: "none" }}
     >
-      <div className="flex justify-between items-end max-w-xl mx-auto">
-        {/* Left/Right buttons */}
-        <div className="flex gap-3">
+      <div className="flex justify-between items-end max-w-md mx-auto">
+        {/* Left/Right buttons - smaller and more transparent */}
+        <div className="flex gap-2 pointer-events-auto">
           <button
             onPointerDown={handlePointerDown("left")}
             onPointerUp={handlePointerUp("left")}
             onPointerLeave={handlePointerUp("left")}
             onPointerCancel={handlePointerUp("left")}
-            className="w-[72px] h-[72px] rounded-full bg-white/25 border-2 border-white/50 flex items-center justify-center text-white text-3xl select-none active:bg-white/50"
+            className="w-12 h-12 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-white/60 text-xl select-none active:bg-white/40"
             style={{ touchAction: "none", WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
           >
             ◀
@@ -44,20 +44,20 @@ export default function TouchControls({ onControl }: TouchControlsProps) {
             onPointerUp={handlePointerUp("right")}
             onPointerLeave={handlePointerUp("right")}
             onPointerCancel={handlePointerUp("right")}
-            className="w-[72px] h-[72px] rounded-full bg-white/25 border-2 border-white/50 flex items-center justify-center text-white text-3xl select-none active:bg-white/50"
+            className="w-12 h-12 rounded-full bg-white/15 border border-white/30 flex items-center justify-center text-white/60 text-xl select-none active:bg-white/40"
             style={{ touchAction: "none", WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
           >
             ▶
           </button>
         </div>
 
-        {/* Jump button */}
+        {/* Jump button - smaller */}
         <button
           onPointerDown={handlePointerDown("jump")}
           onPointerUp={handlePointerUp("jump")}
           onPointerLeave={handlePointerUp("jump")}
           onPointerCancel={handlePointerUp("jump")}
-          className="w-[88px] h-[88px] rounded-full bg-pink-500/40 border-2 border-pink-400/70 flex items-center justify-center text-white text-3xl select-none active:bg-pink-500/70"
+          className="w-14 h-14 rounded-full bg-pink-500/20 border border-pink-400/40 flex items-center justify-center text-pink-300/70 text-xs font-bold select-none active:bg-pink-500/50 pointer-events-auto"
           style={{ touchAction: "none", WebkitTouchCallout: "none", WebkitUserSelect: "none" }}
         >
           JUMP

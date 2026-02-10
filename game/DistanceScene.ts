@@ -9,12 +9,13 @@ export class DistanceScene extends Phaser.Scene {
   private spaceKey!: Phaser.Input.Keyboard.Key;
   private heartsCollected: number = 0;
   private messageTexts: string[] = [
-    "Our first late-night call",
-    "The day we couldn't stop laughing",
-    "Every time we said goodnight",
+    "Do you remember my first message to you?",
+    "I'm a happy man when I talk to you",
+    "You liking this game still haha",
   ];
   private inputState = { left: false, right: false, jump: false };
   private bg1!: Phaser.GameObjects.TileSprite;
+  private playerName!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: "DistanceScene" });
@@ -34,7 +35,6 @@ export class DistanceScene extends Phaser.Scene {
 
     this.createStars(width, height);
 
-    // Create ground - one solid floor
     this.platforms = this.physics.add.staticGroup();
 
     const groundY = height - 30;
@@ -42,13 +42,6 @@ export class DistanceScene extends Phaser.Scene {
       const ground = this.platforms.create(x, groundY, "platform") as Phaser.Physics.Arcade.Sprite;
       ground.setScale(2).refreshBody();
     }
-
-    // Create very easy, low platforms - basically stairs
-    this.createEasyPlatform(400, height - 80, 3);
-    this.createEasyPlatform(700, height - 80, 3);
-    this.createEasyPlatform(1000, height - 80, 3);
-    this.createEasyPlatform(1300, height - 80, 3);
-    this.createEasyPlatform(1600, height - 80, 3);
 
     // Player setup
     this.player = this.physics.add.sprite(80, height - 120, "player");
@@ -60,13 +53,20 @@ export class DistanceScene extends Phaser.Scene {
     playerBody.setCollideWorldBounds(false);
     playerBody.setSize(24, 40);
 
-    // Hearts - placed directly on ground, easy to collect
+    // Player name "Debs" floating above
+    this.playerName = this.add.text(this.player.x, this.player.y - 45, "Debs", {
+      fontSize: "14px",
+      color: "#ffc2d4",
+      fontFamily: "Georgia",
+    }).setOrigin(0.5);
+
+    // Hearts on ground level
     this.hearts = this.physics.add.group({ allowGravity: false });
 
     const heartPositions = [
-      { x: 400, y: height - 130 },
-      { x: 850, y: height - 130 },
-      { x: 1300, y: height - 130 },
+      { x: 350, y: height - 100 },
+      { x: 700, y: height - 100 },
+      { x: 1050, y: height - 100 },
     ];
 
     heartPositions.forEach((pos) => {
@@ -84,7 +84,7 @@ export class DistanceScene extends Phaser.Scene {
     });
 
     // Portal
-    this.portal = this.add.sprite(1800, height - 100, "heart");
+    this.portal = this.add.sprite(1400, height - 100, "heart");
     this.portal.setScale(2.5);
     this.portal.setVisible(false);
     this.portal.setTint(0x00ffff);
@@ -101,14 +101,15 @@ export class DistanceScene extends Phaser.Scene {
       this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
 
-    // Camera
-    this.cameras.main.setBounds(0, 0, width * 2.2, height);
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-    this.physics.world.setBounds(0, 0, width * 2.2, height + 100);
+    // Camera - fixed to follow player properly
+    this.cameras.main.setBounds(0, 0, 1600, height);
+    this.cameras.main.startFollow(this.player, true, 0.15, 0.15);
+    this.cameras.main.setDeadzone(100, 50);
+    this.physics.world.setBounds(0, 0, 1600, height + 100);
 
     // Instructions
-    const text = this.add.text(width / 2, 60, "Walk right and collect the hearts ❤️", {
-      fontSize: "22px",
+    const text = this.add.text(width / 2, 40, "Collect the hearts ❤️", {
+      fontSize: "18px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
     }).setOrigin(0.5).setScrollFactor(0);
@@ -116,19 +117,14 @@ export class DistanceScene extends Phaser.Scene {
     this.tweens.add({
       targets: text,
       alpha: 0,
-      delay: 4000,
+      delay: 3000,
       duration: 1000,
     });
   }
 
-  private createEasyPlatform(x: number, y: number, scaleX: number) {
-    const platform = this.platforms.create(x, y, "platform") as Phaser.Physics.Arcade.Sprite;
-    platform.setScale(scaleX, 1).refreshBody();
-  }
-
   private createStars(width: number, height: number) {
     for (let i = 0; i < 40; i++) {
-      const x = Phaser.Math.Between(0, width * 2.2);
+      const x = Phaser.Math.Between(0, 1600);
       const y = Phaser.Math.Between(0, height * 0.5);
       const star = this.add.circle(x, y, Phaser.Math.Between(1, 2), 0xffffff, 0.7);
 
@@ -151,18 +147,22 @@ export class DistanceScene extends Phaser.Scene {
     heartSprite.disableBody(true, true);
 
     const message = this.messageTexts[this.heartsCollected];
-    const text = this.add.text(heartSprite.x, heartSprite.y - 30, message, {
-      fontSize: "18px",
+
+    // Show message in center of screen
+    const text = this.add.text(this.scale.width / 2, this.scale.height / 2 - 50, message, {
+      fontSize: "20px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
       align: "center",
-    }).setOrigin(0.5);
+      backgroundColor: "#00000088",
+      padding: { x: 20, y: 10 },
+    }).setOrigin(0.5).setScrollFactor(0);
 
     this.tweens.add({
       targets: text,
-      y: text.y - 50,
       alpha: 0,
-      duration: 2000,
+      y: text.y - 30,
+      duration: 3000,
       ease: "Power2",
       onComplete: () => text.destroy(),
     });
@@ -172,8 +172,8 @@ export class DistanceScene extends Phaser.Scene {
     if (this.heartsCollected >= 3) {
       this.portal.setVisible(true);
 
-      const portalText = this.add.text(this.portal.x, this.portal.y - 70, "Go here! →", {
-        fontSize: "20px",
+      const portalText = this.add.text(this.portal.x, this.portal.y - 70, "Enter! →", {
+        fontSize: "18px",
         color: "#00ffff",
         fontFamily: "Georgia",
       }).setOrigin(0.5);
@@ -225,11 +225,15 @@ export class DistanceScene extends Phaser.Scene {
       body.setVelocity(0, 0);
     }
 
-    const onGround = body.blocked.down || body.touching.down;
-    const moveSpeed = 250;
-    const jumpPower = -420;
+    // Update name position
+    if (this.playerName) {
+      this.playerName.setPosition(this.player.x, this.player.y - 45);
+    }
 
-    // Get input
+    const onGround = body.blocked.down || body.touching.down;
+    const moveSpeed = 220;
+    const jumpPower = -380;
+
     let moveLeft = this.inputState.left;
     let moveRight = this.inputState.right;
     let wantJump = this.inputState.jump;
@@ -243,7 +247,6 @@ export class DistanceScene extends Phaser.Scene {
       wantJump = wantJump || this.spaceKey.isDown;
     }
 
-    // Movement
     if (moveLeft) {
       body.setVelocityX(-moveSpeed);
       this.player.setFlipX(true);
@@ -254,12 +257,10 @@ export class DistanceScene extends Phaser.Scene {
       body.setVelocityX(0);
     }
 
-    // Jump
     if (wantJump && onGround) {
       body.setVelocityY(jumpPower);
     }
 
-    // Parallax
     if (this.bg1) {
       this.bg1.tilePositionX = this.cameras.main.scrollX * 0.1;
     }
