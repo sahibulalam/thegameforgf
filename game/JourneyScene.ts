@@ -145,7 +145,7 @@ export class JourneyScene extends Phaser.Scene {
 
     // Instruction
     const instrSize = Math.min(22, width * 0.04);
-    const text = this.add.text(width / 2, height * 0.18, "Walk to her... →", {
+    const text = this.add.text(width / 2, height * 0.18, "Walk to him... →", {
       fontSize: instrSize + "px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
