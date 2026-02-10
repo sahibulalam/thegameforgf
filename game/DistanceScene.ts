@@ -25,8 +25,8 @@ export class DistanceScene extends Phaser.Scene {
     const width = this.scale.width;
     const height = this.scale.height;
 
-    // Calculate responsive positions based on screen size
-    const platformY = height * 0.55; // Platforms at 55% from top
+    // Platforms at 40% from top - CENTER of screen
+    const platformY = height * 0.4;
     const playerStartY = platformY - 60;
 
     this.heartsCollected = 0;
@@ -40,18 +40,17 @@ export class DistanceScene extends Phaser.Scene {
 
     this.createStars(width, height);
 
-    // Floating platforms - in the middle of screen
+    // Floating platforms - CENTER of screen
     this.platforms = this.physics.add.staticGroup();
 
-    // Create floating platform path
     const platformPositions = [
       { x: 80, y: platformY },
       { x: 280, y: platformY - 20 },
-      { x: 480, y: platformY + 10 },
-      { x: 680, y: platformY - 30 },
-      { x: 880, y: platformY },
+      { x: 480, y: platformY + 15 },
+      { x: 680, y: platformY - 25 },
+      { x: 880, y: platformY + 10 },
       { x: 1080, y: platformY - 15 },
-      { x: 1280, y: platformY + 5 },
+      { x: 1280, y: platformY },
     ];
 
     platformPositions.forEach((pos) => {
@@ -60,7 +59,7 @@ export class DistanceScene extends Phaser.Scene {
 
     // Player setup
     this.player = this.physics.add.sprite(100, playerStartY, "player");
-    this.player.setScale(1.3);
+    this.player.setScale(1.4);
 
     const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
     playerBody.setGravityY(500);
@@ -69,8 +68,8 @@ export class DistanceScene extends Phaser.Scene {
     playerBody.setSize(24, 40);
 
     // Player name "Debs" floating above
-    this.playerName = this.add.text(this.player.x, this.player.y - 50, "Debs", {
-      fontSize: "16px",
+    this.playerName = this.add.text(this.player.x, this.player.y - 55, "Debs", {
+      fontSize: "18px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
       fontStyle: "bold",
@@ -80,14 +79,14 @@ export class DistanceScene extends Phaser.Scene {
     this.hearts = this.physics.add.group({ allowGravity: false });
 
     const heartPositions = [
-      { x: 300, y: platformY - 80 },
-      { x: 700, y: platformY - 90 },
-      { x: 1100, y: platformY - 75 },
+      { x: 300, y: platformY - 70 },
+      { x: 700, y: platformY - 80 },
+      { x: 1100, y: platformY - 65 },
     ];
 
     heartPositions.forEach((pos) => {
       const heart = this.hearts.create(pos.x, pos.y, "heart") as Phaser.Physics.Arcade.Sprite;
-      heart.setScale(1.2);
+      heart.setScale(1.3);
 
       this.tweens.add({
         targets: heart,
@@ -98,7 +97,6 @@ export class DistanceScene extends Phaser.Scene {
         repeat: -1,
       });
 
-      // Glow effect
       this.tweens.add({
         targets: heart,
         alpha: { from: 0.7, to: 1 },
@@ -110,8 +108,8 @@ export class DistanceScene extends Phaser.Scene {
     });
 
     // Portal at end
-    this.portal = this.add.sprite(1400, platformY - 50, "heart");
-    this.portal.setScale(2.5);
+    this.portal = this.add.sprite(1400, platformY - 40, "heart");
+    this.portal.setScale(2.8);
     this.portal.setVisible(false);
     this.portal.setTint(0x00ffff);
     this.physics.add.existing(this.portal, true);
@@ -127,15 +125,15 @@ export class DistanceScene extends Phaser.Scene {
       this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
 
-    // Camera setup
+    // Camera setup - follow player in center
     this.cameras.main.setBounds(0, 0, 1600, height);
-    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
-    this.cameras.main.setDeadzone(width * 0.2, height * 0.3);
-    this.physics.world.setBounds(0, 0, 1600, height + 200);
+    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    this.cameras.main.setDeadzone(width * 0.15, height * 0.2);
+    this.physics.world.setBounds(0, 0, 1600, height + 300);
 
-    // Instructions
-    const text = this.add.text(width / 2, height * 0.15, "Collect the hearts ❤️", {
-      fontSize: Math.min(24, width * 0.04) + "px",
+    // Instructions at top
+    const text = this.add.text(width / 2, height * 0.1, "Collect the hearts ❤️", {
+      fontSize: Math.min(26, width * 0.04) + "px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
     }).setOrigin(0.5).setScrollFactor(0);
@@ -146,27 +144,15 @@ export class DistanceScene extends Phaser.Scene {
       delay: 3000,
       duration: 1000,
     });
-
-    // Handle resize
-    this.scale.on("resize", this.handleResize, this);
-  }
-
-  private handleResize(gameSize: Phaser.Structs.Size) {
-    const width = gameSize.width;
-    const height = gameSize.height;
-
-    this.cameras.main.setSize(width, height);
-    this.bg1.setSize(width, height);
   }
 
   private createFloatingPlatform(x: number, y: number, scaleX: number) {
     const platform = this.platforms.create(x, y, "platform") as Phaser.Physics.Arcade.Sprite;
-    platform.setScale(scaleX, 1.2).refreshBody();
+    platform.setScale(scaleX, 1.3).refreshBody();
 
-    // Add floating animation to platforms
     this.tweens.add({
       targets: platform,
-      y: y - 5,
+      y: y - 6,
       duration: 2000 + Math.random() * 1000,
       ease: "Sine.easeInOut",
       yoyo: true,
@@ -175,9 +161,9 @@ export class DistanceScene extends Phaser.Scene {
   }
 
   private createStars(width: number, height: number) {
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 60; i++) {
       const x = Phaser.Math.Between(0, 1600);
-      const y = Phaser.Math.Between(0, height * 0.4);
+      const y = Phaser.Math.Between(0, height);
       const star = this.add.circle(x, y, Phaser.Math.Between(1, 3), 0xffffff, 0.8);
 
       this.tweens.add({
@@ -200,14 +186,13 @@ export class DistanceScene extends Phaser.Scene {
 
     const message = this.messageTexts[this.heartsCollected];
 
-    // Show message in center of screen
     const fontSize = Math.min(22, this.scale.width * 0.035);
-    const text = this.add.text(this.scale.width / 2, this.scale.height * 0.35, message, {
+    const text = this.add.text(this.scale.width / 2, this.scale.height * 0.2, message, {
       fontSize: fontSize + "px",
       color: "#ffc2d4",
       fontFamily: "Georgia",
       align: "center",
-      backgroundColor: "#000000aa",
+      backgroundColor: "#000000cc",
       padding: { x: 20, y: 12 },
     }).setOrigin(0.5).setScrollFactor(0);
 
@@ -225,8 +210,8 @@ export class DistanceScene extends Phaser.Scene {
     if (this.heartsCollected >= 3) {
       this.portal.setVisible(true);
 
-      const portalText = this.add.text(this.portal.x, this.portal.y - 70, "Enter! →", {
-        fontSize: "20px",
+      const portalText = this.add.text(this.portal.x, this.portal.y - 80, "Enter! →", {
+        fontSize: "22px",
         color: "#00ffff",
         fontFamily: "Georgia",
       }).setOrigin(0.5);
@@ -234,8 +219,8 @@ export class DistanceScene extends Phaser.Scene {
       this.tweens.add({
         targets: this.portal,
         alpha: { from: 0.7, to: 1 },
-        scaleX: { from: 2.3, to: 2.8 },
-        scaleY: { from: 2.3, to: 2.8 },
+        scaleX: { from: 2.5, to: 3 },
+        scaleY: { from: 2.5, to: 3 },
         duration: 600,
         ease: "Sine.easeInOut",
         yoyo: true,
@@ -274,20 +259,20 @@ export class DistanceScene extends Phaser.Scene {
     const height = this.scale.height;
 
     // Reset if fallen
-    if (this.player.y > height + 100) {
-      const platformY = height * 0.55;
+    if (this.player.y > height + 150) {
+      const platformY = height * 0.4;
       this.player.setPosition(100, platformY - 60);
       body.setVelocity(0, 0);
     }
 
     // Update name position
     if (this.playerName) {
-      this.playerName.setPosition(this.player.x, this.player.y - 50);
+      this.playerName.setPosition(this.player.x, this.player.y - 55);
     }
 
     const onGround = body.blocked.down || body.touching.down;
-    const moveSpeed = 240;
-    const jumpPower = -480;
+    const moveSpeed = 250;
+    const jumpPower = -520;
 
     let moveLeft = this.inputState.left;
     let moveRight = this.inputState.right;
